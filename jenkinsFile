@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS'
+    }
+
+    stages {
+
+        stage('Clonar repositorio') {
+            steps {
+                checkout scm
+                echo "hola, paso 1"
+            }
+        }
+
+        stage('Instalar dependencias') {
+            steps {
+                bat 'npm install'
+            }
+        }
+
+        stage('Ejecutar pruebas') {
+            steps {
+                bat 'npm test'
+            }
+        }
+    }
+}
