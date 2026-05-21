@@ -17,6 +17,7 @@ pipeline {
         stage('Instalar dependencias') {
             steps {
                 bat 'npm install'
+                echo "hola, paso 2"
             }
         }
 
