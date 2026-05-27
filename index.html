@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PetLog · Vue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="./css/style.css"/>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── Cabecera ── -->
+  <header class="header">
+    <h1 class="header-title">Pet<span>Log</span></h1>
+    <span class="header-badge">Vue 3 · CRUD</span>
+  </header>
+
+  <div class="layout">
+
+    <!-- ════════════════════════════════════
+         PANEL IZQUIERDO: FORMULARIO
+         Para agregar un campo nuevo:
+           1. Define la propiedad en campoVacio() (app.js)
+           2. Agrega el campo aquí en el HTML
+           3. Muéstralo en la tarjeta (más abajo)
+    ═══════════════════════════════════════ -->
+    <aside class="form-panel">
+      <p class="panel-title">{{ editando ? 'Editar mascota' : 'Nueva mascota' }}</p>
+
+      <form class="form" @submit.prevent="guardar">
+
+        <!-- Nombre -->
+        <div class="field">
+          <label>Nombre</label>
+          <input v-model.trim="form.nombre" type="text" placeholder="Ej: Luna, Max..."/>
+          <span class="field-error">{{ errores.nombre }}</span>
+        </div>
+
+        <!-- Especie -->
+        <div class="field">
+          <label>Especie</label>
+          <select v-model="form.especie">
+            <option value="">— Seleccionar —</option>
+            <option value="gato">🐱 Gato</option>
+            <option value="perro">🐶 Perro</option>
+            <option value="dinosaurio">🦕 Dinosaurio</option>
+          </select>
+          <span class="field-error">{{ errores.especie }}</span>
+        </div>
+
+        <!-- Edad + Color -->
+        <div class="field-row">
+          <div class="field">
+            <label>Edad (años)</label>
+            <input v-model.number="form.edad" type="number" min="0" max="200" placeholder="0"/>
+            <span class="field-error">{{ errores.edad }}</span>
+          </div>
+          <div class="field">
+            <label>Color de pelaje</label>
+            <input v-model.trim="form.color" type="text" placeholder="Ej: dorado"/>
+            <span class="field-error">{{ errores.color }}</span>
+          </div>
+        </div>
+
+        <!-- Alimento -->
+        <div class="field">
+          <label>Alimento favorito</label>
+          <input v-model.trim="form.alimento" type="text" placeholder="Ej: pollo, helecho..."/>
+          <span class="field-error">{{ errores.alimento }}</span>
+        </div>
+
+        <!-- ✏️ AGREGAR CAMPO NUEVO AQUÍ
+             Ejemplo:
+             <div class="field">
+               <label>¿Vacunado?</label>
+               <select v-model="form.vacunado">
+                 <option value="">— Seleccionar —</option>
+                 <option value="sí">Sí</option>
+                 <option value="no">No</option>
+               </select>
+             </div>
+        -->
+
+        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.5rem;">
+          <button type="submit" class="btn btn-accent">
+            {{ editando ? '💾 Guardar cambios' : '＋ Registrar mascota' }}
+          </button>
+          <button v-if="editando" type="button" class="btn btn-ghost" @click="cancelar">
+            Cancelar edición
+          </button>
+        </div>
+      </form>
+
+      <!-- Estadísticas -->
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-num">{{ mascotas.length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ contarPor('gato') }}</span>
+          <span class="stat-label">🐱 Gatos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ contarPor('perro') }}</span>
+          <span class="stat-label">🐶 Perros</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{{ contarPor('dinosaurio') }}</span>
+          <span class="stat-label">🦕 Dinos</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ════════════════════════════════════
+         PANEL DERECHO: LISTA
+    ═══════════════════════════════════════ -->
+    <section class="list-panel">
+
+      <!-- Barra de búsqueda + filtros -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input v-model="busqueda" type="text" placeholder="Buscar por nombre..."/>
+        </div>
+        <div class="chips">
+          <button
+            v-for="f in filtros"
+            :key="f.valor"
+            class="chip"
+            :class="{ active: filtroActivo === f.valor }"
+            @click="filtroActivo = f.valor"
+          >{{ f.label }}</button>
+        </div>
+      </div>
+
+      <span class="count-label">{{ listaMostrada.length }} de {{ mascotas.length }} mascotas</span>
+
+      <!-- Grid de tarjetas -->
+      <transition-group name="list" tag="div" class="grid">
+        <div class="card" v-for="m in listaMostrada" :key="m.id">
+
+          <div class="card-stripe" :style="{ background: colorStripe(m.especie) }"></div>
+
+          <div class="card-head">
+            <span class="card-emoji">{{ emojiEspecie(m.especie) }}</span>
+            <span class="card-badge" :class="`badge-${m.especie}`">{{ m.especie }}</span>
+          </div>
+
+          <!-- ── Cuerpo de la tarjeta ──
+               Para mostrar un campo nuevo agrega un .card-row aquí:
+               <div class="card-row">
+                 <span>💉</span>
+                 <span>Vacunado:</span>
+                 <span>{{ m.vacunado }}</span>
+               </div>
+          -->
+          <div class="card-body">
+            <p class="card-name">{{ m.nombre }}</p>
+            <div class="card-row"><span>⏳</span><span>Edad:</span><span>{{ m.edad }} año{{ m.edad !== 1 ? 's' : '' }}</span></div>
+            <div class="card-row"><span>🎨</span><span>Pelaje:</span><span>{{ m.color }}</span></div>
+            <div class="card-row"><span>🍽</span><span>Favorito:</span><span>{{ m.alimento }}</span></div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-icon-sm btn-edit" @click="iniciarEdicion(m)">✎ Editar</button>
+            <button class="btn-icon-sm btn-del"  @click="pedirEliminar(m)">🗑 Eliminar</button>
+          </div>
+        </div>
+      </transition-group>
+
+      <!-- Estado vacío -->
+      <div v-if="listaMostrada.length === 0" class="empty">
+        <span class="empty-icon">🦴</span>
+        <span v-if="mascotas.length === 0">Aún no hay mascotas. Registra la primera.</span>
+        <span v-else>Sin resultados para esa búsqueda.</span>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- ── Modal de confirmación ── -->
+  <transition name="fade">
+    <div class="overlay" v-if="modalVisible" @click.self="modalVisible = false">
+      <div class="modal">
+        <h3>¿Eliminar mascota?</h3>
+        <p>¿Seguro que deseas eliminar a <strong>{{ aMascotaEliminar?.nombre }}</strong>? No se puede deshacer.</p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" style="flex:1" @click="modalVisible = false">Cancelar</button>
+          <button class="btn btn-accent" style="flex:1; background:var(--danger); color:#fff" @click="confirmarEliminar">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ── Toast ── -->
+  <transition name="fade">
+    <div class="toast" v-if="toastVisible">{{ toastMsg }}</div>
+  </transition>
+
+</div>
+
+<!-- Vue 3 CDN (debe cargarse antes que app.js) -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
