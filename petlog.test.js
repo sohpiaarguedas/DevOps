@@ -27,7 +27,7 @@ const {
   actualizarMascota,
   eliminarMascota,
   ESPECIES_VALIDAS,
-} = require('../petlog')
+} = require('./petlog')
 
 // ─────────────────────────────────────────────
 //  Fixture reutilizable

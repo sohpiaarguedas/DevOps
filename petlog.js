@@ -52,16 +52,30 @@ function contarPor(mascotas, especie) {
 // ✏️ Para validar un campo nuevo, agrégalo aquí.
 function validarForm(form) {
   const e = {}
-  if (!form.nombre || !String(form.nombre).trim())
-    e.nombre = 'El nombre es requerido.'
-  if (!form.especie || !String(form.especie).trim())
-    e.especie = 'Selecciona una especie.'
-  if (form.edad === '' || form.edad === null || form.edad === undefined)
-    e.edad = 'La edad es requerida.'
-  if (!form.color || !String(form.color).trim())
-    e.color = 'Escribe el color de pelaje.'
-  if (!form.alimento || !String(form.alimento).trim())
-    e.alimento = 'El alimento favorito es requerido.'
+
+  // Validación de campos requeridos (ya existía)
+  if (!form.nombre || !String(form.nombre).trim()) e.nombre = 'El nombre es requerido.'
+  if (!form.especie || !String(form.especie).trim()) e.especie = 'Selecciona una especie.'
+  if (form.edad === '' || form.edad === null || form.edad === undefined) e.edad = 'La edad es requerida.'
+  if (!form.color || !String(form.color).trim()) e.color = 'Escribe el color de pelaje.'
+  if (!form.alimento || !String(form.alimento).trim()) e.alimento = 'El alimento favorito es requerido.'
+
+  // ── Nuevas validaciones para corregir los tests de DEUDA ──
+  
+  // 1. Validar que sea número y no negativo
+  if (form.edad !== '' && form.edad !== null && form.edad !== undefined) {
+    if (typeof form.edad !== 'number') {
+      e.edad = 'La edad debe ser un número.'
+    } else if (form.edad < 0) {
+      e.edad = 'La edad no puede ser negativa.'
+    }
+  }
+
+  // 2. Validar que la especie sea una de las permitidas en el enum
+  if (form.especie && !ESPECIES_VALIDAS.includes(form.especie)) {
+    e.especie = 'Especie no válida.'
+  }
+
   return e
 }
 
