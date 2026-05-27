@@ -2,10 +2,12 @@
 //  PetLog · app.js
 //  Lógica Vue 3 (Composition API)
 // ─────────────────────────────────────────────
+//pruebas
 
 const { createApp, ref, computed } = Vue
 
 createApp({
+  
   setup() {
 
     // ════════════════════════════════════════════
