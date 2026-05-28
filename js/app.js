@@ -2,7 +2,7 @@
 //  PetLog · app.js
 //  Lógica Vue 3 (Composition API)
 // ─────────────────────────────────────────────
-//pruebas
+//hola grupo
 
 const { createApp, ref, computed } = Vue
 
