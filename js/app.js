@@ -5,7 +5,6 @@
 //hola grupo
 
 const { createApp, ref, computed } = Vue
-
 createApp({
   
   setup() {
@@ -48,7 +47,7 @@ createApp({
     const filtros = [
       { label: 'Todos',      valor: 'todos' },
       { label: '🐱 Gatos',   valor: 'gato' },
-      { label: '🐶 Perros',  valor: 'perro' },
+      { label: ' Perros',  valor: 'perro' },
       { label: '🦕 Dinos',   valor: 'dinosaurio' },
     ]
 
